@@ -110,44 +110,42 @@ void drawLabelForBoard(ALLEGRO_FONT *font)
 void drawShipOnBoard(char row, int col, char direction, int ship_length, ALLEGRO_COLOR ship_color)
 {
     int row_idx = rowToIndex(row); // Convert row letter to index
+    printf("Drawing ship at row: %c, col: %d, direction: %c\n", row, col, direction); // Debug
 
-    // Debugging output to ensure correct input is processed
-    printf("Drawing ship starting at row %c (row_idx: %d), col %d, direction %c, length %d\n", row, row_idx, col, direction, ship_length);
-
-    // Adjust for the grid's starting x and y positions
+    // Loop through the length of the ship
     for (int i = 0; i < ship_length; ++i)
     {
-        int draw_row = row_idx, draw_col = col;
+        int draw_row = row_idx;  // Row index to draw
+        int draw_col = col;      // Column index to draw
 
-        // Apply direction shifts for each part of the ship
-        if (direction == 'U') // Move ship up by reducing row
+        // Move the position based on direction
+        if (direction == 'L') // Move ship left (decrease row)
             draw_row = row_idx - i;
-        else if (direction == 'R') // Move ship right by increasing column
+        else if (direction == 'D') // Move ship down (increase column)
             draw_col = col + i;
-        else if (direction == 'D') // Move ship down by increasing row
+        else if (direction == 'R') // Move ship right (increase row)
             draw_row = row_idx + i;
-        else if (direction == 'L') // Move ship left by reducing column
+        else if (direction == 'U') // Move ship up (decrease column)
             draw_col = col - i;
 
-        // Debugging: Log each part of the ship being drawn
-        printf("Drawing ship part at row %d, col %d\n", draw_row, draw_col);
-
-        // Ensure the position stays within the grid bounds
+        // Check bounds and debug information
+        printf("Part %d of ship: row = %d, col = %d\n", i, draw_row, draw_col);
         if (draw_row < 0 || draw_row >= GRID_SIZE || draw_col < 0 || draw_col >= GRID_SIZE)
         {
-            printf("Warning: Part of the ship is out of bounds at row %d, col %d\n", draw_row, draw_col);
-            continue; // Skip drawing out-of-bound parts
+            printf("Ship part out of bounds at row %d, col %d\n", draw_row, draw_col);
+            continue; // Skip drawing if out of bounds
         }
 
         // Draw the rectangle for each part of the ship
         al_draw_filled_rectangle(
-            GRID_START_X + draw_col * CELL_SIZE,
-            GRID_START_Y + draw_row * CELL_SIZE,
-            GRID_START_X + (draw_col + 1) * CELL_SIZE,
-            GRID_START_Y + (draw_row + 1) * CELL_SIZE,
-            ship_color);
+            GRID_START_X + draw_row * CELL_SIZE,              // X position
+            GRID_START_Y + draw_col * CELL_SIZE,              // Y position
+            GRID_START_X + (draw_row + 1) * CELL_SIZE,        // X position (right)
+            GRID_START_Y + (draw_col + 1) * CELL_SIZE,        // Y position (bottom)
+            ship_color);                                      // Ship color
     }
 }
+
 
 
 // Draw all ships that are currently stored in the ship list
@@ -239,17 +237,14 @@ int main()
                 {
                     printf("Character on %d is : %c\n", i, input[i]);
                 }
-                char row = input[1];
+                char row = input[0];
                 printf("row variable: %c\n", row);
-                int cal = input[0]; // Convert char digit to int
-                int col = rowToIndex(cal);
+                int col = input[1] - '0'; // Convert char digit to int
                 printf("col variable: %d\n", col);
                 char direction = input[2];
                 printf("direction variable: %c\n", direction);
                 printf("Parsed input: Row = %c, Col = %d, Direction = %c\n", row, col, direction);
-                bool trueOrFalse = is_within_bounds(col, row, shipLengths[currentShipIndex], direction);
-                printf("Your boolean variable is: %s\n", trueOrFalse ? "true" : "false");
-                if (trueOrFalse)
+                if (is_within_bounds(row, col, shipLengths[currentShipIndex], direction))
                 {
                     // Add the ship to the list
                     ships.push_back({row, col, direction, shipLengths[currentShipIndex]});
